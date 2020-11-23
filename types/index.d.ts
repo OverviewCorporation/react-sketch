@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 declare module 'react-sketch' {
 	import * as React from 'react'
 	
@@ -40,6 +42,7 @@ declare module 'react-sketch' {
 		// image format when calling toDataURL
 		imageFormat?: string
 		// Sketch data for controlling sketch from
+		zoomOpts?: object,
 		// outside the component
 		value?: object
 		// Set to true if you wish to force load the given value, even if it is  the same
@@ -84,7 +87,7 @@ declare module 'react-sketch' {
 		 *   scale: <Number: initial scale of image>
 		 * }
 		 */
-		addImg(dataUrl: string, options?: { left?: number, top?: number, scale?: number }): void
+		addImg(dataUrl: string, options?: { left?: number, top?: number, scale?: number }, imageOpts?: {}): void
 
 		/**
 		 * Zoom the drawing by the factor specified
@@ -198,9 +201,18 @@ declare module 'react-sketch' {
 			stretchedX?: boolean
 			stretchedY?: boolean
 			[name: string]: any
-		}): void
+		}, customOpts?:{}): void
 		
 		addText(text: string, options?: {}): void
+
+		generateDrawingOverlay(overlayOpts?: {
+			format?: string
+			quality?: number
+			multiplier?: number
+			left?: number
+			top?: number
+			width?: number
+			height?: number}): void
 		
 	}
 }

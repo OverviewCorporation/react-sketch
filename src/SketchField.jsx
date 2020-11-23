@@ -40,6 +40,8 @@ class SketchField extends PureComponent {
     tool: PropTypes.string,
     // image format when calling toDataURL
     imageFormat: PropTypes.string,
+    // Zoom on wheel options.
+    zoomOpts: PropTypes.object,
     // Sketch data for controlling sketch from
     // outside the component
     value: PropTypes.object,
@@ -94,6 +96,7 @@ class SketchField extends PureComponent {
     widthCorrection: 0,
     heightCorrection: 0,
     forceValue: false,
+    zoomOpts: {minZoom: 1, maxZoom: 10, zoomStep: 400},
     onObjectAdded:()=>null,
     onObjectModified:()=>null,
     onObjectRemoved:()=>null,
@@ -154,7 +157,11 @@ class SketchField extends PureComponent {
    *   scale: <Number: initial scale of image>
    * }
    */
-  addImg = (dataUrl, options = {}) => {
+  addImg = (dataUrl, options = {  'addNotToHistory': true,
+                                       'deleteNotAllow': true,
+                                       'overlayBackground': true },
+           imageOpts = {crossOrigin: 'anonymous' }
+            ) => {
     let canvas = this._fc;
     fabric.Image.fromURL(dataUrl, (oImg) => {
       let opts = {
@@ -166,10 +173,21 @@ class SketchField extends PureComponent {
       oImg.scale(opts.scale);
       oImg.set({
         'left': opts.left,
-        'top': opts.top
+        'top': opts.top,
+        selectable: true
       });
+      canvas.setActiveObject(oImg);
+      const _getObject = canvas.getActiveObject();
+      _getObject.hasBorders = false;
+      _getObject.hasControls = false;
+      Object.assign(oImg, options);
       canvas.add(oImg);
-    });
+      canvas.centerObject(oImg);
+      oImg.setCoords();
+      canvas.setActiveObject(oImg);
+      canvas.height = oImg.height;
+      canvas.renderAll();
+    }, Object.assign({}, imageOpts));
   };
 
   /**
@@ -188,7 +206,10 @@ class SketchField extends PureComponent {
     obj.__originalState = objState;
     let state = JSON.stringify(objState);
     // object, previous state, current state
-    this._history.keep([obj, state, state])
+    if(obj && !obj.addToHistory){
+      this._history.keep([obj, state, state])
+    }
+    
     onObjectAdded(e);
   };
 
@@ -225,7 +246,9 @@ class SketchField extends PureComponent {
     // record current object state as json and update to originalState
     obj.__originalState = objState;
     let currState = JSON.stringify(objState);
-    this._history.keep([obj, prevState, currState]);
+    if(obj && obj.addToHistory){
+      this._history.keep([obj, prevState, currState]);
+    }
     onObjectModified(e);
   };
 
@@ -362,17 +385,52 @@ class SketchField extends PureComponent {
    * @param factor the zoom factor
    */
   zoom = (factor) => {
+    const { zoomOpts } = this.props;
     let canvas = this._fc;
-    let objects = canvas.getObjects();
-    for (let i in objects) {
-      objects[i].scaleX = objects[i].scaleX * factor;
-      objects[i].scaleY = objects[i].scaleY * factor;
-      objects[i].left = objects[i].left * factor;
-      objects[i].top = objects[i].top * factor;
-      objects[i].setCoords();
-    }
-    canvas.renderAll();
-    canvas.calcOffset();
+    let zoom = canvas.getZoom() / factor;
+    if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
+    if (zoom < zoomOpts.minZoom) zoom = zoomOpts.minZoom;
+    canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom);
+    // for (let i in objects) {
+    //   objects[i].scaleX = objects[i].scaleX * factor;
+    //   objects[i].scaleY = objects[i].scaleY * factor;
+    //   objects[i].left = objects[i].left * factor;
+    //   objects[i].top = objects[i].top * factor;
+    //   objects[i].setCoords();
+    // }
+    // canvas.renderAll();
+    // canvas.calcOffset();
+  };
+
+  zoomOnWheel = (opt) => {
+      const { zoomOpts } = this.props;
+      let canvas = this._fc;
+      let delta = opt.e.deltaY;
+      let zoom = canvas.getZoom();
+      zoom = zoom + delta / zoomOpts.zoomStep;
+      if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
+      if (zoom < zoomOpts.minZoom) zoom = zoomOpts.minZoom;
+      canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+      opt.e.preventDefault();
+      opt.e.stopPropagation();
+      const vpt = canvas.viewportTransform;
+      if (vpt[4] >= 0) {
+        canvas.viewportTransform[4] = 0;
+      } else if (vpt[4] < canvas.getWidth() - canvas.backgroundImage.width * zoom) {
+        canvas.viewportTransform[4] = canvas.getWidth() - canvas.backgroundImage.width * zoom;
+      }
+      if (vpt[5] >= 0) {
+        canvas.viewportTransform[5] = 0;
+      } else if (vpt[5] < canvas.getHeight() - canvas.backgroundImage.height * zoom) {
+        canvas.viewportTransform[5] = canvas.getHeight() - canvas.backgroundImage.height * zoom;
+      }
+
+      // zoom *= zoomOpts.zoomStep ** delta;
+      // if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
+      // if (zoom < zoomOpts.minZoom) zoom = zoomOpts.minZoom;
+      // canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+      // opt.e.preventDefault();
+      // opt.e.stopPropagation();
   };
 
   /**
@@ -506,8 +564,15 @@ class SketchField extends PureComponent {
    * @returns {string} JSON string of the canvas just cleared
    */
   clear = (propertiesToInclude) => {
+    let canvas = this._fc;
     let discarded = this.toJSON(propertiesToInclude);
-    this._fc.clear();
+    const arrObj = canvas.getObjects();
+    arrObj.forEach(csObj => {
+      if(!csObj.deleteNotAllow){
+        canvas.remove(csObj);
+      }
+    });
+    // this._fc.clear();
     this._history.clear();
     return discarded
   };
@@ -585,15 +650,18 @@ class SketchField extends PureComponent {
    * @param dataUrl the dataUrl to be used as a background
    * @param options
    */
-  setBackgroundFromDataUrl = (dataUrl, options = {}) => {
+  setBackgroundFromDataUrl = (dataUrl, options = {}, customOpts= {}) => {
     let canvas = this._fc;
     let img = new Image();
+    const opts = { 'addToHistory': false, 'deleteNotAllow': true, 'overlayBackground': true };
+    const csOptions = Object.assign(opts, customOpts);
     img.setAttribute('crossOrigin', 'anonymous');
-    const { stretched, stretchedX, stretchedY, ...fabricOptions } = options
+    const { stretched, stretchedX, stretchedY, ...fabricOptions  } = options;
     img.onload = () => {
       const imgObj = new fabric.Image(img);
-      if (stretched || stretchedX) imgObj.scaleToWidth(canvas.width)
-      if (stretched || stretchedY) imgObj.scaleToHeight(canvas.height)
+      if (stretched || stretchedX) imgObj.scaleToWidth(canvas.width);
+      if (stretched || stretchedY) imgObj.scaleToHeight(canvas.height);
+      Object.assign(imgObj, csOptions);
       canvas.setBackgroundImage(imgObj, () => canvas.renderAll(), fabricOptions)
     };
     img.src = dataUrl
@@ -620,15 +688,36 @@ class SketchField extends PureComponent {
       eventFunction(e);
   }
 
+  callZoomEvent = (e, eventFunction) => {
+    const { tool } = this.props;
+    if(tool && (tool === Tool.Select) || (tool === Tool.Pan)){
+      eventFunction(e);
+    }
+  };
+
+  generateDrawingOverlay = (overlayOpts = {format: 'png'}) => {
+    let canvas = this._fc;
+    canvas.backgroundImage.opacity = 0;
+    const arrObj = canvas.getObjects();
+    arrObj.forEach(csObj => {
+      if(csObj.overlayBackground){
+        canvas.remove(csObj);
+      }
+    });
+    const encodeUrl = canvas.toDataURL({...overlayOpts});
+    canvas.backgroundImage.opacity = 1;
+    return encodeUrl;
+  };
+
   componentDidMount = () => {
     let {
       tool,
       value,
       undoSteps,
       defaultValue,
-      backgroundColor
+      backgroundColor,
+      zoomOpts
     } = this.props;
-
     let canvas = this._fc = new fabric.Canvas(this._canvas/*, {
          preserveObjectStacking: false,
          renderOnAddRemove: false,
@@ -662,6 +751,7 @@ class SketchField extends PureComponent {
     canvas.on('object:moving', e => this.callEvent(e, this._onObjectMoving));
     canvas.on('object:scaling', e => this.callEvent(e, this._onObjectScaling));
     canvas.on('object:rotating', e => this.callEvent(e, this._onObjectRotating));
+    canvas.on('mouse:wheel', (opt) => { this.callZoomEvent(opt, this.zoomOnWheel)});
     // IText Events fired on Adding Text
     // canvas.on("text:event:changed", console.log)
     // canvas.on("text:selection:changed", console.log)
@@ -709,12 +799,13 @@ class SketchField extends PureComponent {
       className,
       style,
       width,
-      height
+      height,
+      zoomOpts
     } = this.props;
 
     let canvasDivStyle = Object.assign({}, style ? style : {},
-      width ? { width: width } : {},
-      height ? { height: height } : { height: 512 });
+      width ? { width: width } : {width : '100%'},
+      height ? { height: height } : { height: '100%' });
     return (
       <div
         className={className}
