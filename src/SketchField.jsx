@@ -42,6 +42,7 @@ class SketchField extends PureComponent {
     imageFormat: PropTypes.string,
     // Zoom on wheel options.
     zoomOpts: PropTypes.object,
+    resizeAllow: PropTypes.bool,
     // Sketch data for controlling sketch from
     // outside the component
     value: PropTypes.object,
@@ -96,6 +97,7 @@ class SketchField extends PureComponent {
     widthCorrection: 0,
     heightCorrection: 0,
     forceValue: false,
+    resizeAllow: false,
     zoomOpts: {minZoom: 1, maxZoom: 10, zoomStep: 400},
     onObjectAdded:()=>null,
     onObjectModified:()=>null,
@@ -157,11 +159,7 @@ class SketchField extends PureComponent {
    *   scale: <Number: initial scale of image>
    * }
    */
-  addImg = (dataUrl, options = {  'addNotToHistory': true,
-                                       'deleteNotAllow': true,
-                                       'overlayBackground': true },
-           imageOpts = {crossOrigin: 'anonymous' }
-            ) => {
+  addImg = (dataUrl, options= {}) => {
     let canvas = this._fc;
     fabric.Image.fromURL(dataUrl, (oImg) => {
       let opts = {
@@ -173,21 +171,58 @@ class SketchField extends PureComponent {
       oImg.scale(opts.scale);
       oImg.set({
         'left': opts.left,
-        'top': opts.top,
-        selectable: true
+        'top': opts.top
       });
+      canvas.add(oImg);
+    }, {crossOrigin: 'anonymous' });
+  };
+
+  replaceAndAddImage = (dataUrl, options = {}) => {
+    let canvas = this._fc;
+    canvas.border = '2px solid black';
+    const prevObjects = canvas.getObjects();
+    prevObjects.forEach(imgObj => {
+      if(imgObj.overlayBackground){ canvas.remove(imgObj); }
+    });
+    const tempOpts = {'addNotToHistory': true, 'deleteNotAllow': true, 'overlayBackground': true, ...options};
+    fabric.Image.fromURL(dataUrl, (oImg) => {
+      oImg.set({ selectable: true });
+      const hRatio = canvas.width  / oImg.width;
+      const vRatio =  canvas.height / oImg.height;
+      const ratio  = Math.min(hRatio, vRatio);
+      oImg.scale(ratio);
       canvas.setActiveObject(oImg);
       const _getObject = canvas.getActiveObject();
       _getObject.hasBorders = false;
       _getObject.hasControls = false;
-      Object.assign(oImg, options);
+      Object.assign(oImg, tempOpts);
       canvas.add(oImg);
       canvas.centerObject(oImg);
       oImg.setCoords();
-      canvas.setActiveObject(oImg);
-      canvas.height = oImg.height;
-      canvas.renderAll();
-    }, Object.assign({}, imageOpts));
+      canvas.renderAll()
+    }, {crossOrigin: 'anonymous' });
+  };
+
+  setImageOpacity = (opacity) => {
+    let canvas = this._fc;
+    const prevObjects = canvas.getObjects();
+    prevObjects.forEach(imgObj => {
+      if(imgObj.overlayBackground) {
+          imgObj.opacity = opacity;
+      }
+    });
+  };
+
+  getImageDim = () => {
+    let canvas = this._fc;
+    const prevObjects = canvas.getObjects();
+    const img = {};
+    prevObjects.forEach(imgObj => {
+      if(imgObj.overlayBackground) {
+         Object.assign(img, imgObj);
+      }
+    });
+    return img;
   };
 
   /**
@@ -413,24 +448,12 @@ class SketchField extends PureComponent {
       canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
       opt.e.preventDefault();
       opt.e.stopPropagation();
-      const vpt = canvas.viewportTransform;
-      if (vpt[4] >= 0) {
-        canvas.viewportTransform[4] = 0;
-      } else if (vpt[4] < canvas.getWidth() - canvas.backgroundImage.width * zoom) {
-        canvas.viewportTransform[4] = canvas.getWidth() - canvas.backgroundImage.width * zoom;
-      }
-      if (vpt[5] >= 0) {
-        canvas.viewportTransform[5] = 0;
-      } else if (vpt[5] < canvas.getHeight() - canvas.backgroundImage.height * zoom) {
-        canvas.viewportTransform[5] = canvas.getHeight() - canvas.backgroundImage.height * zoom;
-      }
+  };
 
-      // zoom *= zoomOpts.zoomStep ** delta;
-      // if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
-      // if (zoom < zoomOpts.minZoom) zoom = zoomOpts.minZoom;
-      // canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
-      // opt.e.preventDefault();
-      // opt.e.stopPropagation();
+  resetZoom = () => {
+    let canvas = this._fc;
+    canvas.setZoom(1);
+    canvas.setViewportTransform([1,0,0,1,0,0]);
   };
 
   /**
@@ -650,18 +673,15 @@ class SketchField extends PureComponent {
    * @param dataUrl the dataUrl to be used as a background
    * @param options
    */
-  setBackgroundFromDataUrl = (dataUrl, options = {}, customOpts= {}) => {
+  setBackgroundFromDataUrl = (dataUrl, options = {}) => {
     let canvas = this._fc;
     let img = new Image();
-    const opts = { 'addToHistory': false, 'deleteNotAllow': true, 'overlayBackground': true };
-    const csOptions = Object.assign(opts, customOpts);
     img.setAttribute('crossOrigin', 'anonymous');
     const { stretched, stretchedX, stretchedY, ...fabricOptions  } = options;
     img.onload = () => {
       const imgObj = new fabric.Image(img);
       if (stretched || stretchedX) imgObj.scaleToWidth(canvas.width);
       if (stretched || stretchedY) imgObj.scaleToHeight(canvas.height);
-      Object.assign(imgObj, csOptions);
       canvas.setBackgroundImage(imgObj, () => canvas.renderAll(), fabricOptions)
     };
     img.src = dataUrl
@@ -695,20 +715,6 @@ class SketchField extends PureComponent {
     }
   };
 
-  generateDrawingOverlay = (overlayOpts = {format: 'png'}) => {
-    let canvas = this._fc;
-    canvas.backgroundImage.opacity = 0;
-    const arrObj = canvas.getObjects();
-    arrObj.forEach(csObj => {
-      if(csObj.overlayBackground){
-        canvas.remove(csObj);
-      }
-    });
-    const encodeUrl = canvas.toDataURL({...overlayOpts});
-    canvas.backgroundImage.opacity = 1;
-    return encodeUrl;
-  };
-
   componentDidMount = () => {
     let {
       tool,
@@ -716,7 +722,7 @@ class SketchField extends PureComponent {
       undoSteps,
       defaultValue,
       backgroundColor,
-      zoomOpts
+      resizeAllow
     } = this.props;
     let canvas = this._fc = new fabric.Canvas(this._canvas/*, {
          preserveObjectStacking: false,
@@ -735,7 +741,9 @@ class SketchField extends PureComponent {
     this._selectedTool = selectedTool;
 
     // Control resize
-    window.addEventListener('resize', this._resize, false);
+    if(resizeAllow){
+      window.addEventListener('resize', this._resize, false);
+    }
 
     // Initialize History, with maximum number of undo steps
     this._history = new History(undoSteps);
@@ -767,13 +775,19 @@ class SketchField extends PureComponent {
 
   };
 
-  componentWillUnmount = () => window.removeEventListener('resize', this._resize);
+  componentWillUnmount = () => {
+    const { resizeAllow } = this.props;
+    if(resizeAllow){
+      window.removeEventListener('resize', this._resize);
+    }
+  };
 
   componentDidUpdate = (prevProps, prevState) => {
     if (this.props.width !== prevProps.width
       || this.props.height !== prevProps.height) {
-
-      this._resize()
+      if(this.props.resizeAllow){
+        this._resize()
+      }
     }
 
     if (this.props.tool !== prevProps.tool) {

@@ -12,6 +12,7 @@ declare module 'react-sketch' {
 	    RectangleLabel: string;
 	    Select: string;
 	    Pan: string;
+		Highlighter: string,
 	    DefaultTool: string;
 	} = {
 	    Circle: 'circle',
@@ -22,6 +23,7 @@ declare module 'react-sketch' {
 	    RectangleLabel: 'rectangle-label',
 	    Select: 'select',
 	    Pan: 'pan',
+		Highlighter: 'highlighter',
 	    DefaultTool: 'default-tool',
 	}
 	export class SketchField extends React.PureComponent<{
@@ -44,6 +46,7 @@ declare module 'react-sketch' {
 		// Sketch data for controlling sketch from
 		zoomOpts?: object,
 		// outside the component
+		resizeAllow: boolean,
 		value?: object
 		// Set to true if you wish to force load the given value, even if it is  the same
 		forceValue?: boolean
@@ -204,15 +207,6 @@ declare module 'react-sketch' {
 		}, customOpts?:{}): void
 		
 		addText(text: string, options?: {}): void
-
-		generateDrawingOverlay(overlayOpts?: {
-			format?: string
-			quality?: number
-			multiplier?: number
-			left?: number
-			top?: number
-			width?: number
-			height?: number}): void
 		
 	}
 }
