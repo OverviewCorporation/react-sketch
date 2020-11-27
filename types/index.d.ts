@@ -170,7 +170,7 @@ declare module 'react-sketch' {
 		 *
 		 * @param json JSON string or object
 		 */
-		fromJSON(json: string): void
+		fromJSON(json: string, cb?: void): void
 
 		/**
 		 * Clear the content of the canvas, this will also clear history but will return the canvas content as JSON to be
@@ -192,6 +192,36 @@ declare module 'react-sketch' {
 		copy(): void
 
 		paste(): void
+
+		/**
+		 * reset the zoom initail state.
+		 */
+		resetZoom(): void
+
+		/**
+		 * zoom on mouse wheel.
+		 */
+		zoomOnWheel(): void
+
+		/**
+		 * Add the image into canvas with dataUrl and recenter it.
+		 *
+		 * @param dataUrl the dataUrl to be used as a background image.
+		 * @param options
+		 */
+		replaceAndAddImage(dataUrl: string, options?:{}): void
+
+		/**
+		 * Sets the image opacity.
+		 *
+		 * @param opacity number to set image opacity.
+		 */
+		setImageOpacity(opacity: number): void
+
+		/**
+		 * Get the image dimensions
+		 */
+		getImageDim(): void
 
 		/**
 		 * Sets the background from the dataUrl given

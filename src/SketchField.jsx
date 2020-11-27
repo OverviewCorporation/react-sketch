@@ -562,7 +562,7 @@ class SketchField extends PureComponent {
    *
    * @param json JSON string or object
    */
-  fromJSON = (json) => {
+  fromJSON = (json, cb) => {
     if (!json) return;
     let canvas = this._fc;
     setTimeout(() => {
@@ -575,7 +575,10 @@ class SketchField extends PureComponent {
         if (this.props.onChange) {
           this.props.onChange()
         }
-      })
+        if(cb){
+          cb();
+        }
+      });
     }, 100)
   };
 
