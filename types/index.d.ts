@@ -209,7 +209,7 @@ declare module 'react-sketch' {
 		 * @param dataUrl the dataUrl to be used as a background image.
 		 * @param options
 		 */
-		replaceAndAddImage(dataUrl: string, loadFromUrl: Boolean, options?:{}): void
+		replaceAndAddImage(imageURL: any, loadFromUrl: Boolean, options?:{}): void
 
 		/**
 		 * Sets the image opacity.
