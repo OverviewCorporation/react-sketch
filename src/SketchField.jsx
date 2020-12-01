@@ -177,7 +177,7 @@ class SketchField extends PureComponent {
     }, {crossOrigin: 'anonymous' });
   };
 
-  replaceAndAddImage = (dataUrl, options = {}) => {
+  replaceAndAddImage = (imageURL, loadFromUrl = true, options = {}) => {
     let canvas = this._fc;
     canvas.border = '2px solid black';
     const prevObjects = canvas.getObjects();
@@ -185,22 +185,32 @@ class SketchField extends PureComponent {
       if(imgObj.overlayBackground){ canvas.remove(imgObj); }
     });
     const tempOpts = {'addNotToHistory': true, 'deleteNotAllow': true, 'overlayBackground': true, ...options};
-    fabric.Image.fromURL(dataUrl, (oImg) => {
-      oImg.set({ selectable: true });
-      const hRatio = canvas.width  / oImg.width;
-      const vRatio =  canvas.height / oImg.height;
-      const ratio  = Math.min(hRatio, vRatio);
-      oImg.scale(ratio);
-      canvas.setActiveObject(oImg);
-      const _getObject = canvas.getActiveObject();
-      _getObject.hasBorders = false;
-      _getObject.hasControls = false;
-      Object.assign(oImg, tempOpts);
-      canvas.add(oImg);
-      canvas.centerObject(oImg);
-      oImg.setCoords();
-      canvas.renderAll()
-    }, {crossOrigin: 'anonymous' });
+    if(loadFromUrl){
+      fabric.Image.fromURL(imageURL, (oImg) => {
+        this.imageScaleOnAdd(oImg, tempOpts);
+      }, {crossOrigin: 'anonymous' });
+    } else {
+      const imgObj = new fabric.Image(imageURL);
+      this.imageScaleOnAdd(imgObj, tempOpts);
+    }
+  };
+
+  imageScaleOnAdd = (oImg, opts = {}) => {
+    let canvas = this._fc;
+    oImg.set({ selectable: true });
+    const hRatio = canvas.width  / oImg.width;
+    const vRatio =  canvas.height / oImg.height;
+    const ratio  = Math.min(hRatio, vRatio);
+    oImg.scale(ratio);
+    canvas.setActiveObject(oImg);
+    const _getObject = canvas.getActiveObject();
+    _getObject.hasBorders = false;
+    _getObject.hasControls = false;
+    Object.assign(oImg, opts);
+    canvas.add(oImg);
+    canvas.centerObject(oImg);
+    oImg.setCoords();
+    canvas.renderAll();
   };
 
   setImageOpacity = (opacity) => {
@@ -816,8 +826,7 @@ class SketchField extends PureComponent {
       className,
       style,
       width,
-      height,
-      zoomOpts
+      height
     } = this.props;
 
     let canvasDivStyle = Object.assign({}, style ? style : {},
