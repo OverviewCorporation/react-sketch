@@ -11,6 +11,7 @@ import Arrow from './arrow';
 import Rectangle from './rectangle';
 import Circle from './circle';
 import Pan from './pan';
+import CustomPan from './custom-pan';
 import Tool from './tools';
 import Highlighter from './highlighter';
 import RectangleLabel from './rectangle-label';
@@ -124,6 +125,7 @@ class SketchField extends PureComponent {
     this._tools[Tool.RectangleLabel] = new RectangleLabel(fabricCanvas);
     this._tools[Tool.Circle] = new Circle(fabricCanvas);
     this._tools[Tool.Pan] = new Pan(fabricCanvas);
+    this._tools[Tool.CustomPan] = new CustomPan(fabricCanvas);
     this._tools[Tool.Highlighter] = new Highlighter(fabricCanvas);
     this._tools[Tool.DefaultTool] = new DefaultTool(fabricCanvas);
   };
@@ -723,7 +725,7 @@ class SketchField extends PureComponent {
 
   callZoomEvent = (e, eventFunction) => {
     const { tool } = this.props;
-    if(tool && (tool === Tool.Select) || (tool === Tool.Pan)){
+    if(tool && (tool === Tool.Select) || (tool === Tool.CustomPan)){
       eventFunction(e);
     }
   };
