@@ -10,7 +10,7 @@ class Rectangle extends FabricCanvasTool {
     let canvas = this._canvas;
     canvas.isDrawingMode = canvas.selection = false;
     canvas.forEachObject((o) => o.selectable = o.evented = false);
-    this._width = props.lineWidth;
+    this._width = 0.1; // props.lineWidth;
     this._color = props.lineColor;
     this._fill = props.fillColor;
   }

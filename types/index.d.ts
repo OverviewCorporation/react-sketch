@@ -237,6 +237,8 @@ declare module 'react-sketch' {
 		}, customOpts?:{}): void
 		
 		addText(text: string, options?: {}): void
+
+		updateTool(): void;
 		
 	}
 }

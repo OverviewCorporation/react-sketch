@@ -190,6 +190,9 @@ class SketchField extends PureComponent {
     if(loadFromUrl){
       fabric.Image.fromURL(imageURL, (oImg) => {
         this.imageScaleOnAdd(oImg, tempOpts);
+        if(options.cb){
+          options.cb();
+        }
       }, {crossOrigin: 'anonymous' });
     } else {
       const imgObj = new fabric.Image(imageURL);
@@ -213,6 +216,13 @@ class SketchField extends PureComponent {
     canvas.centerObject(oImg);
     oImg.setCoords();
     canvas.renderAll();
+  };
+
+  updateTool = () => {
+    this._selectedTool = this._tools[this.props.tool];
+    if (this._selectedTool) {
+      this._selectedTool.configureCanvas(this.props);
+    }
   };
 
   setImageOpacity = (opacity) => {
@@ -739,11 +749,10 @@ class SketchField extends PureComponent {
       backgroundColor,
       resizeAllow
     } = this.props;
-    let canvas = this._fc = new fabric.Canvas(this._canvas/*, {
-         preserveObjectStacking: false,
-         renderOnAddRemove: false,
-         skipTargetFind: true
-         }*/);
+    let canvas = this._fc = new fabric.Canvas(this._canvas, {
+         preserveObjectStacking: true,
+         enableRetinaScaling: false
+    });
 
     this._initTools(canvas);
 
