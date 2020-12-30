@@ -188,12 +188,16 @@ class SketchField extends PureComponent {
     });
     const tempOpts = {'addNotToHistory': true, 'deleteNotAllow': true, 'overlayBackground': true, ...options};
     if(loadFromUrl){
-      fabric.Image.fromURL(imageURL, (oImg) => {
-        this.imageScaleOnAdd(oImg, tempOpts);
-        if(options.cb){
-          options.cb();
-        }
-      }, {crossOrigin: 'anonymous' });
+      // fabric.Image.fromURL(imageURL, (oImg) => {
+      //   this.imageScaleOnAdd(oImg, tempOpts);
+      //   if(options.cb){
+      //     options.cb();
+      //   }
+      // }, {crossOrigin: 'anonymous' });
+      fabric.util.loadImage(imageURL, () => {
+        const imgObj = new fabric.Image(imageURL);
+        this.imageScaleOnAdd(imgObj, tempOpts);
+      }, null, { crossOrigin: 'anonymous' })
     } else {
       const imgObj = new fabric.Image(imageURL);
       this.imageScaleOnAdd(imgObj, tempOpts);
