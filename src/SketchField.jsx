@@ -194,6 +194,20 @@ class SketchField extends PureComponent {
       //     options.cb();
       //   }
       // }, {crossOrigin: 'anonymous' });
+      const imgObj = new Image();
+
+      imgObj.crossOrigin = "Anonymous";
+      imgObj.src = imageURL;
+      imgObj.onload =  () => {
+        const image = new fabric.Image(imgObj);
+        this.imageScaleOnAdd(image, tempOpts);
+        if(options.cb){ options.cb(); }
+        debugger;
+      };
+      imgObj.onerror =  () => {
+          if(options.cb){ options.cb(); }
+          debugger;
+      };
       fabric.util.loadImage(imageURL, () => {
         const imgObj = new fabric.Image(imageURL);
         this.imageScaleOnAdd(imgObj, tempOpts);
