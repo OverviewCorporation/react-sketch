@@ -201,12 +201,10 @@ class SketchField extends PureComponent {
       imgObj.onload =  () => {
         const image = new fabric.Image(imgObj);
         this.imageScaleOnAdd(image, tempOpts);
-        if(options.cb){ options.cb(); }
-        debugger;
+        if(options.complete){ options.complete(); }
       };
       imgObj.onerror =  () => {
-          if(options.cb){ options.cb(); }
-          debugger;
+          if(options.error){ options.error(); }
       };
       fabric.util.loadImage(imageURL, () => {
         const imgObj = new fabric.Image(imageURL);
