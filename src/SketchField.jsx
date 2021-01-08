@@ -750,10 +750,10 @@ class SketchField extends PureComponent {
   }
 
   callZoomEvent = (e, eventFunction) => {
-    const { tool } = this.props;
-    if(tool && (tool === Tool.Select) || (tool === Tool.CustomPan)){
-      eventFunction(e);
-    }
+    // const { tool } = this.props;
+    // if(tool && (tool === Tool.Select) || (tool === Tool.CustomPan)){
+    eventFunction(e);
+    // }
   };
 
   componentDidMount = () => {
