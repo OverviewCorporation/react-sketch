@@ -200,7 +200,6 @@ class SketchField extends PureComponent {
         dataUrl,
         (oImg) => {
           oImg.scale(1);
-          console.log("imageOptions", imageOptions);
           oImg.set(imageOptions);
           canvas.add(oImg);
           return approve(oImg);
