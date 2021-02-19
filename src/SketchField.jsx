@@ -552,7 +552,7 @@ class SketchField extends PureComponent {
     let canvas = this._fc;
     let delta = opt.e.deltaY;
     let zoom = canvas.getZoom();
-    zoom = zoom + delta / zoomOpts.zoomStep;
+    zoom = zoom - delta / zoomOpts.zoomStep;
     if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
     if (zoom < zoomOpts.minZoom) zoom = zoomOpts.minZoom;
     canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
