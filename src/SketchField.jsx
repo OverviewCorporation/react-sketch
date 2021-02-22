@@ -202,6 +202,7 @@ class SketchField extends PureComponent {
           oImg.scale(1);
           oImg.set(imageOptions);
           canvas.add(oImg);
+          canvas.centerObject(oImg);
           return approve(oImg);
         },
         { crossOrigin: "anonymous" }
