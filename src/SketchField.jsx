@@ -185,8 +185,7 @@ class SketchField extends PureComponent {
   addLayer = (dataUrl, opts) => {
     let canvas = this._fc;
     let imageOptions = {
-      left: 0,
-      right: 0,
+      top: 0,
       addNotToHistory: true,
       deleteNotAllow: true,
       overlayBackground: true,
@@ -199,10 +198,15 @@ class SketchField extends PureComponent {
       fabric.Image.fromURL(
         dataUrl,
         (oImg) => {
-          oImg.scale(1);
+          const hRatio = canvas.width / oImg.width;
+          const vRatio = canvas.height / oImg.height;
+          const ratio = Math.min(hRatio, vRatio);
+          console.log("addLayer ScaleRatio", ratio);
+          console.log("addLayer options", imageOptions);
+          oImg.scale(ratio);
           oImg.set(imageOptions);
           canvas.add(oImg);
-          canvas.centerObject(oImg);
+          // canvas.centerObject(oImg);
           return approve(oImg);
         },
         { crossOrigin: "anonymous" }
@@ -229,7 +233,7 @@ class SketchField extends PureComponent {
 
   replaceAndAddImage = (imageURL, loadFromUrl = true, options = {}) => {
     let canvas = this._fc;
-    canvas.border = "2px solid black";
+    // canvas.border = "2px solid black";
     const prevObjects = canvas.getObjects();
     prevObjects.forEach((imgObj) => {
       if (imgObj.overlayBackground) {
@@ -243,7 +247,7 @@ class SketchField extends PureComponent {
       ...options,
     };
     let imgObj;
-    const self = this
+    const self = this;
     return new Promise(function (approve) {
       if (loadFromUrl) {
         // fabric.Image.fromURL(imageURL, (oImg) => {
@@ -273,7 +277,7 @@ class SketchField extends PureComponent {
           () => {
             imgObj = new fabric.Image(imageURL);
             self.imageScaleOnAdd(imgObj, tempOpts);
-            approve(imgObj)
+            approve(imgObj);
           },
           null,
           { crossOrigin: "anonymous" }
@@ -281,23 +285,35 @@ class SketchField extends PureComponent {
       } else {
         imgObj = new fabric.Image(imageURL);
         self.imageScaleOnAdd(imgObj, tempOpts);
-        approve(imgObj)
+        approve(imgObj);
       }
     });
   };
 
   imageScaleOnAdd = (oImg, opts = {}) => {
     let canvas = this._fc;
-    oImg.set({ selectable: true });
+    const baseOptions = {
+      top: 0,
+      addNotToHistory: true,
+      deleteNotAllow: true,
+      overlayBackground: true,
+      selectable: false,
+      hasControls: false,
+      hasBorders: false,
+    };
+    Object.assign(baseOptions, opts);
+    oImg.set(baseOptions);
     const hRatio = canvas.width / oImg.width;
     const vRatio = canvas.height / oImg.height;
     const ratio = Math.min(hRatio, vRatio);
+    console.log("imageScaleRatio", ratio);
     oImg.scale(ratio);
-    canvas.setActiveObject(oImg);
-    const _getObject = canvas.getActiveObject();
-    _getObject.hasBorders = false;
-    _getObject.hasControls = false;
-    Object.assign(oImg, opts);
+    // canvas.setActiveObject(oImg);
+    // const _getObject = canvas.getActiveObject();
+    // _getObject.hasBorders = false;
+    // _getObject.hasControls = false;
+    // Object.assign(oImg, opts);
+    console.log("imageScaleOnAdd options", opts);
     canvas.add(oImg);
     canvas.centerObject(oImg);
     oImg.setCoords();
