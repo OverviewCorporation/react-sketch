@@ -185,7 +185,6 @@ class SketchField extends PureComponent {
   addLayer = (dataUrl, opts) => {
     let canvas = this._fc;
     let imageOptions = {
-      top: 0,
       addNotToHistory: true,
       deleteNotAllow: true,
       overlayBackground: true,
@@ -201,12 +200,10 @@ class SketchField extends PureComponent {
           const hRatio = canvas.width / oImg.width;
           const vRatio = canvas.height / oImg.height;
           const ratio = Math.min(hRatio, vRatio);
-          console.log("addLayer ScaleRatio", ratio);
-          console.log("addLayer options", imageOptions);
           oImg.scale(ratio);
           oImg.set(imageOptions);
           canvas.add(oImg);
-          // canvas.centerObject(oImg);
+          canvas.centerObject(oImg);
           return approve(oImg);
         },
         { crossOrigin: "anonymous" }
@@ -250,19 +247,13 @@ class SketchField extends PureComponent {
     const self = this;
     return new Promise(function (approve) {
       if (loadFromUrl) {
-        // fabric.Image.fromURL(imageURL, (oImg) => {
-        //   self.imageScaleOnAdd(oImg, tempOpts);
-        //   if(options.cb){
-        //     options.cb();
-        //   }
-        // }, {crossOrigin: 'anonymous' });
         imgObj = new Image();
 
         imgObj.crossOrigin = "Anonymous";
         imgObj.src = imageURL;
         imgObj.onload = () => {
           const image = new fabric.Image(imgObj);
-          self.imageScaleOnAdd(image, tempOpts);
+          approve(self.imageScaleOnAdd(image, tempOpts));
           if (options.complete) {
             options.complete();
           }
@@ -276,16 +267,14 @@ class SketchField extends PureComponent {
           imageURL,
           () => {
             imgObj = new fabric.Image(imageURL);
-            self.imageScaleOnAdd(imgObj, tempOpts);
-            approve(imgObj);
+            approve(self.imageScaleOnAdd(imgObj, tempOpts));
           },
           null,
           { crossOrigin: "anonymous" }
         );
       } else {
         imgObj = new fabric.Image(imageURL);
-        self.imageScaleOnAdd(imgObj, tempOpts);
-        approve(imgObj);
+        approve(self.imageScaleOnAdd(imgObj, tempOpts));
       }
     });
   };
@@ -293,7 +282,6 @@ class SketchField extends PureComponent {
   imageScaleOnAdd = (oImg, opts = {}) => {
     let canvas = this._fc;
     const baseOptions = {
-      top: 0,
       addNotToHistory: true,
       deleteNotAllow: true,
       overlayBackground: true,
@@ -306,18 +294,12 @@ class SketchField extends PureComponent {
     const hRatio = canvas.width / oImg.width;
     const vRatio = canvas.height / oImg.height;
     const ratio = Math.min(hRatio, vRatio);
-    console.log("imageScaleRatio", ratio);
     oImg.scale(ratio);
-    // canvas.setActiveObject(oImg);
-    // const _getObject = canvas.getActiveObject();
-    // _getObject.hasBorders = false;
-    // _getObject.hasControls = false;
-    // Object.assign(oImg, opts);
-    console.log("imageScaleOnAdd options", opts);
     canvas.add(oImg);
     canvas.centerObject(oImg);
     oImg.setCoords();
     canvas.renderAll();
+    return { oImg, canvas };
   };
 
   updateTool = () => {
