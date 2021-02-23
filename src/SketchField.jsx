@@ -185,8 +185,6 @@ class SketchField extends PureComponent {
   addLayer = (dataUrl, opts) => {
     let canvas = this._fc;
     let imageOptions = {
-      left: 0,
-      right: 0,
       addNotToHistory: true,
       deleteNotAllow: true,
       overlayBackground: true,
@@ -199,7 +197,10 @@ class SketchField extends PureComponent {
       fabric.Image.fromURL(
         dataUrl,
         (oImg) => {
-          oImg.scale(1);
+          const hRatio = canvas.width / oImg.width;
+          const vRatio = canvas.height / oImg.height;
+          const ratio = Math.min(hRatio, vRatio);
+          oImg.scale(ratio);
           oImg.set(imageOptions);
           canvas.add(oImg);
           canvas.centerObject(oImg);
@@ -288,16 +289,25 @@ class SketchField extends PureComponent {
 
   imageScaleOnAdd = (oImg, opts = {}) => {
     let canvas = this._fc;
-    oImg.set({ selectable: true });
+    let imageOptions = {
+      addNotToHistory: true,
+      deleteNotAllow: true,
+      overlayBackground: true,
+      selectable: false,
+      hasControls: false,
+      hasBorders: false,
+    };
+    Object.assign(imageOptions, opts);
+    oImg.set(imageOptions);
     const hRatio = canvas.width / oImg.width;
     const vRatio = canvas.height / oImg.height;
     const ratio = Math.min(hRatio, vRatio);
     oImg.scale(ratio);
-    canvas.setActiveObject(oImg);
-    const _getObject = canvas.getActiveObject();
-    _getObject.hasBorders = false;
-    _getObject.hasControls = false;
-    Object.assign(oImg, opts);
+    // canvas.setActiveObject(oImg);
+    // const _getObject = canvas.getActiveObject();
+    // _getObject.hasBorders = false;
+    // _getObject.hasControls = false;
+    // Object.assign(oImg, opts);
     canvas.add(oImg);
     canvas.centerObject(oImg);
     oImg.setCoords();
