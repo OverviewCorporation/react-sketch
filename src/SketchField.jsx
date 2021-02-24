@@ -244,7 +244,7 @@ class SketchField extends PureComponent {
       ...options,
     };
     let imgObj;
-    const self = this
+    const self = this;
     return new Promise(function (approve) {
       if (loadFromUrl) {
         // fabric.Image.fromURL(imageURL, (oImg) => {
@@ -274,7 +274,7 @@ class SketchField extends PureComponent {
           () => {
             imgObj = new fabric.Image(imageURL);
             self.imageScaleOnAdd(imgObj, tempOpts);
-            approve(imgObj)
+            approve(imgObj);
           },
           null,
           { crossOrigin: "anonymous" }
@@ -282,7 +282,7 @@ class SketchField extends PureComponent {
       } else {
         imgObj = new fabric.Image(imageURL);
         self.imageScaleOnAdd(imgObj, tempOpts);
-        approve(imgObj)
+        approve(imgObj);
       }
     });
   };
@@ -561,7 +561,7 @@ class SketchField extends PureComponent {
   zoomOnWheel = (opt) => {
     const { zoomOpts } = this.props;
     let canvas = this._fc;
-    let delta = opt.e.deltaY;
+    let delta = opt.e.deltaY * 3;
     let zoom = canvas.getZoom();
     zoom = zoom - delta / zoomOpts.zoomStep;
     if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
