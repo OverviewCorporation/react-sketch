@@ -24,7 +24,7 @@
   "main": "./dist",
   "types": "./types/index.d.ts",
   "scripts": {
-    "build:internal": "cross-env NODE_ENV=production webpack --mode production --config webpack/library.cfg.js --display-modules",
+    "build": "cross-env NODE_ENV=production webpack --mode production --config webpack/library.cfg.js --display-modules",
     "build:light": "babel ./src --out-dir ./dist",
     "build:examples": "cross-env NODE_ENV=production webpack --mode production --config webpack/examples.cfg.js",
     "clean": "rimraf dist build",
