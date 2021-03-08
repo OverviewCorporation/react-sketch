@@ -59,7 +59,7 @@ class CustomPan extends FabricCanvasTool {
       console.log("TOUCH GESTURE running");
       this.isDown = false;
 
-      // const point = new fabric.Point(e.self.x, e.self.y);
+      const point = new fabric.Point(e.self.x, e.self.y);
       // let delta = e.self.scale;
       let zoom = canvas.getZoom();
       // console.log("TOUCH GESTURE ZOOM and DELTA", zoom, delta);
@@ -75,14 +75,7 @@ class CustomPan extends FabricCanvasTool {
       // const lPinchScale = e.self.scale;
       // const scaleDiff = (lPinchScale - 1) / 10 + 1; // Slow down zoom speed
       // canvas.setZoom(zoom * scaleDiff);
-
-      // alternative
-      let zoomStartScale = 1;
-      if (e.self.state == "start") {
-        zoomStartScale = self.canvas.getZoom();
-      }
-      const delta = zoomStartScale * e.self.scale;
-      canvas.zoomToPoint(point, delta);
+      canvas.zoomToPoint(point, 1);
     }
   }
 }
