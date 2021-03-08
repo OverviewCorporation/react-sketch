@@ -58,7 +58,7 @@ class CustomPan extends FabricCanvasTool {
     if (e.e.touches && e.e.touches.length == 2) {
       this.isDown = false;
 
-      let delta = e.self.scale * 1;
+      let delta = e.self.scale * 3;
       const p1 = e.e.touches[0];
       const p2 = e.e.touches[1];
 
