@@ -59,15 +59,18 @@ class CustomPan extends FabricCanvasTool {
       this.isDown = false;
       const point = new fabric.Point(e.self.x, e.self.y);
       let zoomStartScale = canvas.getZoom();
-      let zoom = e.self.scale;
-      zoom = zoomStartScale * zoom;
+      let delta = e.self.scale * 3;
+      let zoom = zoomStartScale - delta / 200; // zoomStartScale * zoom;
       if (zoom > 4) {
         zoom = 4; // max pinch zoom
       }
       if (zoom < 0.85) {
         zoom = 0.85; // min pinch zoom
       }
-      canvas.zoomToPoint(point, zoom);
+      canvas.zoomToPoint(
+        new fabric.Point(canvas.width / 2, canvas.height / 2),
+        zoom
+      );
 
       // SET ZOOM METHOD to resize canvas
       // const lPinchScale = e.self.scale;
