@@ -75,6 +75,7 @@ class CustomPan extends FabricCanvasTool {
       // const lPinchScale = e.self.scale;
       // const scaleDiff = (lPinchScale - 1) / 10 + 1; // Slow down zoom speed
       // canvas.setZoom(zoom * scaleDiff);
+      debugger;
       canvas.zoomToPoint(point, 1);
     }
   }
