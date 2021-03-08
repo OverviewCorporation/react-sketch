@@ -82,7 +82,7 @@ class CustomPan extends FabricCanvasTool {
         zoomStartScale = self.canvas.getZoom();
       }
       const delta = zoomStartScale * e.self.scale;
-      self.canvas.zoomToPoint(point, delta);
+      canvas.zoomToPoint(point, delta);
     }
   }
 }
