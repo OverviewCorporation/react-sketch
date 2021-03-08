@@ -61,9 +61,7 @@ class CustomPan extends FabricCanvasTool {
       let delta = e.self.scale * 2;
       const p1 = e.e.touches[0];
       const p2 = e.e.touches[1];
-
       let zoom = canvas.getZoom();
-      console.log("ZOOM ", zoom, zoomOpts, delta);
       zoom = zoom - delta / zoomOpts.zoomStep;
       if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
       if (zoom < zoomOpts.minZoom) zoom = zoomOpts.minZoom;
