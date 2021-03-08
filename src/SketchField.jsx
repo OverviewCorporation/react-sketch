@@ -443,7 +443,8 @@ class SketchField extends PureComponent {
    * Action when the mouse cursor is moving around within the canvas
    */
    _onTouchGesture = (e) => {
-    this._selectedTool.touchGesture(e);
+     const { zoomOpts } = this.props;
+    this._selectedTool.touchGesture(e, zoomOpts);
   };
 
 

@@ -53,20 +53,34 @@ class CustomPan extends FabricCanvasTool {
     this.isDown = false;
   }
 
-  touchGesture(e) {
+  touchGesture(e, zoomOpts) {
     let canvas = this._canvas;
     if (e.e.touches && e.e.touches.length == 2) {
       this.isDown = false;
-      let zoomStartScale = canvas.getZoom();
-      let zoom = e.self.scale;
-      zoom = zoomStartScale * zoom;
-      if (zoom > 8) {
-        zoom = 8; // max pinch zoom
-      }
-      if (zoom < 0.3) {
-        zoom = 0.3; // min pinch zoom
-      }
-      canvas.setZoom(zoom);
+
+      let delta = e.self.scale * 0.5;
+      const p1 = e.e.touches[0];
+      const p2 = e.e.touches[1];
+
+      let zoom = canvas.getZoom();
+
+      zoom = zoom - delta / zoomOpts.zoomStep;
+      console.log("ZOOM ", zoom, zoomOpts);
+      console.log("P!", p1.clientX, p1.clientY);
+      if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
+      if (zoom < zoomOpts.minZoom) zoom = zoomOpts.minZoom;
+      canvas.zoomToPoint({ x: p1.clientX, y: p1.clientY }, zoom);
+
+      // let zoomStartScale = canvas.getZoom();
+      // let zoom = e.self.scale;
+      // zoom = zoomStartScale * zoom;
+      // if (zoom > 8) {
+      //   zoom = 8; // max pinch zoom
+      // }
+      // if (zoom < 0.3) {
+      //   zoom = 0.3; // min pinch zoom
+      // }
+      // canvas.setToPoint(distance, zoom);
 
       // SET ZOOM METHOD to resize canvas
       // const lPinchScale = e.self.scale;
