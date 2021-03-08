@@ -17,7 +17,8 @@ import Highlighter from "./highlighter";
 import RectangleLabel from "./rectangle-label";
 import DefaultTool from "./defaul-tool";
 
-const fabric = require("fabric").fabric;
+// const fabric = require("fabric").fabric;
+const fabric = require('fabric-with-gestures').fabric
 
 /**
  * Sketch Tool based on FabricJS for React Applications
@@ -435,6 +436,22 @@ class SketchField extends PureComponent {
     const { onMouseMove } = this.props;
     this._selectedTool.doMouseMove(e);
     onMouseMove(e);
+  };
+
+
+  /**
+   * Action when the mouse cursor is moving around within the canvas
+   */
+   _onTouchGesture = (e) => {
+    this._selectedTool.touchGesture(e);
+  };
+
+
+  /**
+   * Action when the mouse cursor is moving around within the canvas
+   */
+   _onTouchDrag = (e) => {
+    this._selectedTool.touchDrag(e);
   };
 
   /**
@@ -895,6 +912,10 @@ class SketchField extends PureComponent {
     canvas.on("mouse:wheel", (opt) => {
       this.callZoomEvent(opt, this.zoomOnWheel);
     });
+
+    canvas.on('touch:gesture', (e) => this.callEvent(e, this._onTouchGesture));
+    // canvas.on('touch:drag', (e) => this.callEvent(e, this._onTouchDrag));
+
     // IText Events fired on Adding Text
     // canvas.on("text:event:changed", console.log)
     // canvas.on("text:selection:changed", console.log)
