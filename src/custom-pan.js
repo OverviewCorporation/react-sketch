@@ -59,22 +59,22 @@ class CustomPan extends FabricCanvasTool {
       console.log("TOUCH GESTURE running");
       this.isDown = false;
 
-      const point = new fabric.Point(e.self.x, e.self.y);
-      let delta = e.self.scale;
+      // const point = new fabric.Point(e.self.x, e.self.y);
+      // let delta = e.self.scale;
       let zoom = canvas.getZoom();
-      console.log("TOUCH GESTURE ZOOM and DELTA", zoom, delta, scale);
+      // console.log("TOUCH GESTURE ZOOM and DELTA", zoom, delta);
 
-      zoom = zoom - delta / 0.5;
-      console.log("TOUCH GESTURE BEFORE", zoom);
-      if (zoom > 4) zoom = 4;
-      if (zoom < 1) zoom = 1;
-      console.log("TOUCH GESTURE ZOOOM", zoom);
-      canvas.zoomToPoint(point, zoom);
+      // zoom = zoom - delta / 0.5;
+      // console.log("TOUCH GESTURE BEFORE", zoom);
+      // if (zoom > 4) zoom = 4;
+      // if (zoom < 1) zoom = 1;
+      // console.log("TOUCH GESTURE ZOOOM", zoom);
+      // canvas.zoomToPoint(point, zoom);
 
       // SET ZOOM METHOD to resize canvas
-      // var lPinchScale = e.self.scale;
-      // var scaleDiff = (lPinchScale - 1) / 10 + 1; // Slow down zoom speed
-      // canvas.setZoom(zoom * scaleDiff);
+      const lPinchScale = e.self.scale;
+      const scaleDiff = (lPinchScale - 1) / 10 + 1; // Slow down zoom speed
+      canvas.setZoom(zoom * scaleDiff);
     }
   }
 }
