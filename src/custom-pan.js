@@ -58,25 +58,32 @@ class CustomPan extends FabricCanvasTool {
     if (e.e.touches && e.e.touches.length == 2) {
       this.isDown = false;
 
-      let delta = e.self.scale * 2;
-      const p1 = e.e.touches[0];
-      const p2 = e.e.touches[1];
-      let zoom = canvas.getZoom();
-      zoom = zoom - delta / zoomOpts.zoomStep;
-      if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
-      if (zoom < zoomOpts.minZoom) zoom = zoomOpts.minZoom;
-      canvas.zoomToPoint({ x: p1.clientX, y: p1.clientY }, delta);
+      // 1st Method
+      // let delta = e.self.scale * 2;
+      // const p1 = e.e.touches[0];
+      // const p2 = e.e.touches[1];
+      // let zoom = canvas.getZoom();
+      // zoom = zoom - delta / zoomOpts.zoomStep;
+      // if (zoom > zoomOpts.maxZoom) zoom = zoomOpts.maxZoom;
+      // if (zoom < zoomOpts.minZoom) zoom = zoomOpts.minZoom;
+      // canvas.zoomToPoint({ x: p1.clientX, y: p1.clientY }, delta);
 
-      // let zoomStartScale = canvas.getZoom();
-      // let zoom = e.self.scale;
-      // zoom = zoomStartScale * zoom;
-      // if (zoom > 8) {
-      //   zoom = 8; // max pinch zoom
-      // }
-      // if (zoom < 0.3) {
-      //   zoom = 0.3; // min pinch zoom
-      // }
-      // canvas.setToPoint(distance, zoom);
+      // Alternative Method
+      const point = new fabric.Point(e.self.x, e.self.y);
+      let zoomStartScale = 1;
+      if (e.self.state == "start") {
+        zoomStartScale = canvas.getZoom();
+      }
+      const delta = zoomStartScale * e.self.scale;
+      canvas.zoomToPoint(point, delta);
+      this.isDown = true;
+      // limit zoom to 4x in
+      if (delta > 4) delta = 4;
+      // limit zoom to 1x out
+      if (delta < 1) {
+        delta = 1;
+        canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+      }
 
       // SET ZOOM METHOD to resize canvas
       // const lPinchScale = e.self.scale;
