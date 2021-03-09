@@ -74,7 +74,7 @@ class CustomPan extends FabricCanvasTool {
       if (e.self.state == "start") {
         zoomStartScale = canvas.getZoom();
       }
-      const delta = zoomStartScale * e.self.scale;
+      let delta = zoomStartScale * e.self.scale;
       canvas.zoomToPoint(point, delta);
       this.isDown = true;
       // limit zoom to 4x in
