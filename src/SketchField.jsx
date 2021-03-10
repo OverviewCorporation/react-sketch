@@ -914,7 +914,7 @@ class SketchField extends PureComponent {
       this.callZoomEvent(opt, this.zoomOnWheel);
     });
 
-    canvas.on('touch:gesture', (e) => this.callEvent(e, this._onTouchGesture));
+    // canvas.on('touch:gesture', (e) => this.callEvent(e, this._onTouchGesture));
 
     // IText Events fired on Adding Text
     // canvas.on("text:event:changed", console.log)
