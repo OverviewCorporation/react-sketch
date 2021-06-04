@@ -20,7 +20,7 @@ class CustomPan extends FabricCanvasTool {
     this.startX = pointer.x;
     this.startY = pointer.y;
 
-    if (o.e instanceof TouchEvent) {
+    if (window.TouchEvent && o.e instanceof TouchEvent) {
       const { clientX, clientY } = o.e.touches[0];
       this.startX = clientX;
       this.startY = clientY;
@@ -32,7 +32,7 @@ class CustomPan extends FabricCanvasTool {
     let canvas = this._canvas;
     if (this.isDown) {
       let delta;
-      if (o.e instanceof TouchEvent) {
+      if (window.TouchEvent && o.e instanceof TouchEvent) {
         // we're on mobile
         const { clientX, clientY } = o.e.touches[0];
         delta = new fabric.Point(clientX - this.startX, clientY - this.startY);
